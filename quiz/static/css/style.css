@@ -1,0 +1,25 @@
+.quiz-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.question {
+    background: #f8f9fa;
+    transition: all 0.3s;
+}
+
+.question:hover {
+    background: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.6s ease-in-out;
+}
+
+.score-excellent { color: #28a745; }
+.score-good { color: #ffc107; }
+.score-poor { color: #dc3545; }
