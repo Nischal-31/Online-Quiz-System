@@ -36,44 +36,45 @@ def quiz_start(request, quiz_id):
     })
 
 @login_required
-@csrf_exempt
 def submit_quiz(request):
     if request.method == 'POST':
         data = request.POST
         quiz_id = data.get('quiz_id')
+
         quiz = get_object_or_404(Quiz, id=quiz_id)
-        
+
         score = 0
         total_questions = quiz.questions.count()
-        
-        for question_id, answer_id in data.items():
-            if question_id.isdigit():
-                question = get_object_or_404(Question, id=question_id)
+
+        # ✅ SAFE LOOP
+        for question in quiz.questions.all():
+            answer_id = data.get(str(question.id))
+
+            if answer_id:
                 try:
                     choice = Choice.objects.get(id=answer_id, question=question)
                     if choice.is_correct:
                         score += 1
                 except Choice.DoesNotExist:
                     pass
-        
-        percentage = (score / total_questions) * 100
-        
-        attempt = UserQuizAttempt.objects.create(
+
+        percentage = (score / total_questions) * 100 if total_questions > 0 else 0
+
+        # ✅ HANDLE UNIQUE CONSTRAINT (IMPORTANT)
+        UserQuizAttempt.objects.update_or_create(
             user=request.user,
             quiz=quiz,
-            score=score,
-            total_questions=total_questions,
-            percentage=percentage
+            defaults={
+                'score': score,
+                'total_questions': total_questions,
+                'percentage': percentage
+            }
         )
-        
-        return JsonResponse({
-            'success': True,
-            'score': score,
-            'total': total_questions,
-            'percentage': round(percentage, 2)
-        })
-    
-    return JsonResponse({'success': False})
+
+        # ✅ CORRECT REDIRECT (use URL name)
+        return redirect('quiz_results', quiz_id=quiz.id)
+
+    return redirect('quiz_list')
 
 def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)

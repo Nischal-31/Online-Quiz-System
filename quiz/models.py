@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -39,7 +39,7 @@ class Choice(models.Model):
         return self.text
 
 class UserQuizAttempt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     total_questions = models.IntegerField()
